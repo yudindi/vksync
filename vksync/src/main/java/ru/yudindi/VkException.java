@@ -12,4 +12,8 @@ public class VkException extends RuntimeException {
 		super(message, cause);
 	}
 
+	public VkException(String message) {
+		super(message);
+	}
+
 }
