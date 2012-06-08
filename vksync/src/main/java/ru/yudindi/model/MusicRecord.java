@@ -3,7 +3,6 @@ package ru.yudindi.model;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
@@ -13,19 +12,21 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  * @author yudindi
  * 
  */
-@XmlRootElement
 public class MusicRecord {
 
-	@XmlAttribute
 	private String remoteFileName;
-	@XmlAttribute
+
 	private String remoteTitle;
-	@XmlAttribute
+
 	private String remoteArtist;
-	@XmlAttribute
+
 	private String localFileName;
-	@XmlAttribute
+
 	private Date modifyDate;
+
+	public MusicRecord() {
+		// JAXB
+	}
 
 	/**
 	 * Creates a new Music Record
@@ -43,14 +44,25 @@ public class MusicRecord {
 		this.modifyDate = new Date();
 	}
 
+	@XmlAttribute
 	public String getRemoteTitle() {
 		return remoteTitle;
 	}
 
+	@XmlAttribute
 	public String getRemoteArtist() {
 		return remoteArtist;
 	}
 
+	public void setRemoteArtist(String remoteArtist) {
+		this.remoteArtist = remoteArtist;
+	}
+
+	public void setRemoteTitle(String remoteTitle) {
+		this.remoteTitle = remoteTitle;
+	}
+
+	@XmlAttribute
 	public String getRemoteFileName() {
 		return remoteFileName;
 	}
@@ -59,6 +71,7 @@ public class MusicRecord {
 		this.remoteFileName = remoteFileName;
 	}
 
+	@XmlAttribute
 	public String getLocalFileName() {
 		return localFileName;
 	}
@@ -68,6 +81,7 @@ public class MusicRecord {
 		this.modifyDate = new Date();
 	}
 
+	@XmlAttribute
 	public Date getModifyDate() {
 		return modifyDate;
 	}

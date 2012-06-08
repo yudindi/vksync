@@ -9,10 +9,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -26,6 +22,7 @@ import org.springframework.stereotype.Repository;
 
 import ru.yudindi.VkException;
 import ru.yudindi.model.MusicRecord;
+import ru.yudindi.model.SyncLog;
 import ru.yudindi.service.DataRepository;
 
 /**
@@ -40,10 +37,10 @@ public class LocalDataRepository implements DataRepository {
 
 	private static final long DEFAULT_COPY_BUFFER_SIZE = 1024 * 1024 * 10;
 
-	@Value("music.synclog.path")
+	@Value("${music.synclog.path}")
 	private String musicSyncFile;
 
-	@Value("music.store.path")
+	@Value("${music.store.path}")
 	private String musicStorePath;
 
 	/*
@@ -51,7 +48,7 @@ public class LocalDataRepository implements DataRepository {
 	 * 
 	 * @see ru.yudindi.DataRepository#loadMusicRecords()
 	 */
-	public Set<MusicRecord> loadMusicRecordsLog() {
+	public SyncLog loadMusicRecordsLog() {
 		LOG.info("Loading list of existing records from the filesystem: "
 				+ musicSyncFile);
 		try {
@@ -60,13 +57,12 @@ public class LocalDataRepository implements DataRepository {
 				LOG.warn(String
 						.format("Music sync log at '%s' not found, returning an empty result",
 								musicSyncFile));
-				return Collections.emptySet();
+				return new SyncLog();
 			}
-			JAXBContext context = JAXBContext.newInstance(MusicRecord.class);
+			JAXBContext context = JAXBContext.newInstance(SyncLog.class);
 			Unmarshaller unmarshaller = context.createUnmarshaller();
-			List<MusicRecord> list = (List<MusicRecord>) unmarshaller
-					.unmarshal(syncLogFile);
-			return new HashSet<MusicRecord>(list);
+			SyncLog log = (SyncLog) unmarshaller.unmarshal(syncLogFile);
+			return log;
 		} catch (JAXBException e) {
 			throw new VkException(
 					"Failed to demarshall list of synced records from an xml",
@@ -74,14 +70,14 @@ public class LocalDataRepository implements DataRepository {
 		}
 	}
 
-	public void saveMusicRecordsLog(Set<MusicRecord> records) {
+	public void saveMusicRecordsLog(SyncLog syncLog) {
 		LOG.info("Saving list of existing records to the filesystem: "
 				+ musicSyncFile);
 		try {
 			File syncLogFile = new File(musicSyncFile);
-			JAXBContext context = JAXBContext.newInstance(MusicRecord.class);
+			JAXBContext context = JAXBContext.newInstance(SyncLog.class);
 			Marshaller marshaller = context.createMarshaller();
-			marshaller.marshal(records, syncLogFile);
+			marshaller.marshal(syncLog, syncLogFile);
 		} catch (JAXBException e) {
 			throw new VkException(
 					"Failed to marshall list of synced records to an xml", e);
@@ -89,8 +85,10 @@ public class LocalDataRepository implements DataRepository {
 	}
 
 	private File getDestinationFile(MusicRecord record) {
-		return new File(musicStorePath + "/" + record.getRemoteArtist() + " - "
-				+ record.getRemoteTitle());
+		String filename = record.getRemoteArtist() + " - "
+				+ record.getRemoteTitle();
+		filename = filename.replaceAll("[/\\\\]", "");
+		return new File(musicStorePath + "/" + filename + ".mp3");
 	}
 
 	/*

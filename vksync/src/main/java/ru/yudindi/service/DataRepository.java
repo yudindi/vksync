@@ -1,8 +1,7 @@
 package ru.yudindi.service;
 
-import java.util.Set;
-
 import ru.yudindi.model.MusicRecord;
+import ru.yudindi.model.SyncLog;
 
 /**
  * Interface for all synced data load/store
@@ -17,9 +16,9 @@ public interface DataRepository {
 	 * 
 	 * @return
 	 */
-	Set<MusicRecord> loadMusicRecordsLog();
+	SyncLog loadMusicRecordsLog();
 
-	void saveMusicRecordsLog(Set<MusicRecord> records);
+	void saveMusicRecordsLog(SyncLog syncLog);
 
 	/**
 	 * Processes and saves a music file. Does renaming and IDv3 tag population

@@ -10,6 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -40,17 +42,20 @@ import ru.yudindi.service.VkService;
 
 @Service("vkService")
 public class DefaultVkService implements VkService {
-	@Value("vk.user")
+	private static final Log LOG = LogFactory.getLog(DefaultVkService.class);
+
+	@Value("${vk.user}")
 	private String user;
-	@Value("vk.password")
+	@Value("${vk.password}")
 	private String password;
-	@Value("vk.id")
-	private String userId;// 980785
+	@Value("${vk.id}")
+	private String userId;
 
 	private DefaultHttpClient httpClient = new DefaultHttpClient();
 	private HttpContext context;
 
 	public List<MusicRecord> getRemoteMusicList() {
+		LOG.info("Retrieving list of music records from vk.com");
 		List<MusicRecord> records = new ArrayList<MusicRecord>();
 
 		String response = execute("http://vk.com/audio.php",
@@ -75,6 +80,7 @@ public class DefaultVkService implements VkService {
 					StringEscapeUtils.unescapeHtml4(recMatcher.group(3)));
 			records.add(record);
 		}
+		LOG.info(String.format("Total %d records retrieved", records.size()));
 		return records;
 	}
 
@@ -163,14 +169,14 @@ public class DefaultVkService implements VkService {
 			params.add(new BasicNameValuePair("q", "1"));
 			params.add(new BasicNameValuePair("al_frame", "1"));
 			params.add(new BasicNameValuePair("from_host", "vk.com"));
-			params.add(new BasicNameValuePair("email", "shmasser@gmail.com"));
-			params.add(new BasicNameValuePair("pass", "Uhjntcr"));
+			params.add(new BasicNameValuePair("email", user));
+			params.add(new BasicNameValuePair("pass", password));
 
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
 			post.setEntity(entity);
 
 			HttpResponse response = httpClient.execute(post, context);
-			response.getEntity().writeTo(System.out);
+			response.getEntity().getContent().close();
 		} catch (IOException e) {
 			throw new VkException("Error during authorization", e);
 		}

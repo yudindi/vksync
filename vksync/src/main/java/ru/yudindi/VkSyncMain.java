@@ -1,6 +1,6 @@
 package ru.yudindi;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ru.yudindi.service.SyncService;
 
@@ -13,11 +13,9 @@ import ru.yudindi.service.SyncService;
 public class VkSyncMain {
 
 	public static void main(String[] args) {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.scan("ru.yudindi");
-		ctx.refresh();
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"applicationContext.xml");
 		SyncService service = ctx.getBean(SyncService.class);
 		service.sync();
 	}
-
 }
